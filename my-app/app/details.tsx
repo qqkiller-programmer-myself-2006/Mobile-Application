@@ -20,6 +20,37 @@ interface PokemonData {
     };
 }
 
+// 🌷 ธีมสี: Soft Pastel - นุ่มนวล สบายตา (อ่านชัดขึ้น)
+const COLORS = {
+    // พื้นหลัก - Warm Cream (สบายตา ไม่แสบ)
+    background: "#FAF7F5",    // Warm Cream
+    cardBg: "#FFFFFF",
+    cardBorder: "#E8D5D5",    // Dusty Rose Border
+
+    // สีหลัก - Muted Soft Pastels
+    purple: "#9A8BB0",        // Soft Lavender (เข้มขึ้น)
+    purpleLight: "#D4C9E0",   // Light Lavender
+    purpleDark: "#7B6A8F",    // Dusty Lavender (เข้มขึ้น)
+
+    blue: "#7BA3BD",          // Dusty Blue (เข้มขึ้น)
+    blueLight: "#C5DAE8",     // Soft Sky
+    blueDark: "#5A8AA8",      // Muted Blue (เข้มขึ้น)
+
+    pink: "#C08888",          // Dusty Rose (เข้มขึ้น)
+    pinkLight: "#E8C5C5",     // Soft Blush
+    pinkDark: "#A06868",      // Muted Rose (เข้มขึ้น)
+
+    // สีเสริม - Muted Warm
+    peach: "#D4B8A0",         // Soft Peach (เข้มขึ้น)
+    mint: "#8FC0A8",          // Dusty Mint (เข้มขึ้น)
+    cream: "#F5EDE5",         // Warm Cream
+
+    // ข้อความ - เข้มขึ้นมาก อ่านชัด
+    textPrimary: "#2D2836",   // Dark Purple Grey (เข้มมาก)
+    textSecondary: "#4A4453", // Medium Grey (เข้มขึ้น)
+    textMuted: "#6B6374",     // Muted Grey (เข้มขึ้น)
+};
+
 export default function Details() {
     const params = useLocalSearchParams();
     const [pokemon, setPokemon] = useState<PokemonData | null>(null);
@@ -58,8 +89,8 @@ export default function Details() {
             <>
                 <Stack.Screen options={{ title: formatName(params.name as string || "Loading...") }} />
                 <View style={styles.loadingContainer}>
-                    <ActivityIndicator size="large" color="#6366F1" />
-                    <Text style={styles.loadingText}>Loading...</Text>
+                    <ActivityIndicator size="large" color={COLORS.purple} />
+                    <Text style={styles.loadingText}>✨ Loading...</Text>
                 </View>
             </>
         );
@@ -70,7 +101,7 @@ export default function Details() {
             <>
                 <Stack.Screen options={{ title: "Error" }} />
                 <View style={styles.errorContainer}>
-                    <Text style={styles.errorEmoji}>😢</Text>
+                    <Text style={styles.errorEmoji}>💔</Text>
                     <Text style={styles.errorText}>{error || "Pokemon not found"}</Text>
                 </View>
             </>
@@ -82,25 +113,32 @@ export default function Details() {
             <Stack.Screen
                 options={{
                     title: formatName(pokemon.name),
-                    headerStyle: { backgroundColor: "#1F2937" },
-                    headerTintColor: "#F9FAFB",
+                    headerStyle: { backgroundColor: COLORS.cardBg },
+                    headerTintColor: COLORS.textPrimary,
                 }}
             />
             <ScrollView style={styles.container} contentContainerStyle={styles.contentContainer}>
                 {/* Pokemon Name Header */}
                 <View style={styles.headerCard}>
                     <Text style={styles.pokemonName}>{formatName(pokemon.name)}</Text>
-                    <View style={styles.divider} />
+                    <View style={styles.dividerContainer}>
+                        <View style={[styles.dividerSegment, { backgroundColor: COLORS.purple }]} />
+                        <View style={[styles.dividerSegment, { backgroundColor: COLORS.blue }]} />
+                        <View style={[styles.dividerSegment, { backgroundColor: COLORS.pink }]} />
+                    </View>
                 </View>
 
                 {/* Sprites Section */}
                 <View style={styles.section}>
-                    <Text style={styles.sectionTitle}>✨ Sprites</Text>
+                    <View style={styles.sectionHeader}>
+                        <Text style={styles.sectionIcon}>🎨</Text>
+                        <Text style={styles.sectionTitle}>Sprites</Text>
+                    </View>
 
                     {/* Normal Sprites */}
                     <Text style={styles.subSectionTitle}>Normal</Text>
                     <View style={styles.spriteRow}>
-                        <View style={styles.spriteCard}>
+                        <View style={[styles.spriteCard, styles.normalCard]}>
                             <Image
                                 source={{ uri: pokemon.sprites.front_default || "" }}
                                 style={styles.spriteImage}
@@ -108,7 +146,7 @@ export default function Details() {
                             />
                             <Text style={styles.spriteLabel}>Front</Text>
                         </View>
-                        <View style={styles.spriteCard}>
+                        <View style={[styles.spriteCard, styles.normalCard]}>
                             <Image
                                 source={{ uri: pokemon.sprites.back_default || "" }}
                                 style={styles.spriteImage}
@@ -119,7 +157,7 @@ export default function Details() {
                     </View>
 
                     {/* Shiny Sprites */}
-                    <Text style={styles.subSectionTitle}>⭐ Shiny</Text>
+                    <Text style={styles.subSectionTitle}>✨ Shiny</Text>
                     <View style={styles.spriteRow}>
                         <View style={[styles.spriteCard, styles.shinyCard]}>
                             <Image
@@ -142,16 +180,23 @@ export default function Details() {
 
                 {/* Stats Section */}
                 <View style={styles.section}>
-                    <Text style={styles.sectionTitle}>📊 Stats</Text>
+                    <View style={styles.sectionHeader}>
+                        <Text style={styles.sectionIcon}>📊</Text>
+                        <Text style={styles.sectionTitle}>Stats</Text>
+                    </View>
                     <View style={styles.statsRow}>
-                        <View style={styles.statCard}>
+                        <View style={[styles.statCard, styles.weightCard]}>
                             <Text style={styles.statIcon}>⚖️</Text>
-                            <Text style={styles.statValue}>{(pokemon.weight / 10).toFixed(1)} kg</Text>
+                            <Text style={[styles.statValue, { color: COLORS.blue }]}>
+                                {(pokemon.weight / 10).toFixed(1)} kg
+                            </Text>
                             <Text style={styles.statLabel}>Weight</Text>
                         </View>
-                        <View style={styles.statCard}>
+                        <View style={[styles.statCard, styles.heightCard]}>
                             <Text style={styles.statIcon}>📏</Text>
-                            <Text style={styles.statValue}>{(pokemon.height / 10).toFixed(1)} m</Text>
+                            <Text style={[styles.statValue, { color: COLORS.purple }]}>
+                                {(pokemon.height / 10).toFixed(1)} m
+                            </Text>
                             <Text style={styles.statLabel}>Height</Text>
                         </View>
                     </View>
@@ -159,24 +204,35 @@ export default function Details() {
 
                 {/* Abilities Section */}
                 <View style={styles.section}>
-                    <Text style={styles.sectionTitle}>⚡ Abilities</Text>
+                    <View style={styles.sectionHeader}>
+                        <Text style={styles.sectionIcon}>⚡</Text>
+                        <Text style={styles.sectionTitle}>Abilities</Text>
+                    </View>
                     <View style={styles.abilitiesContainer}>
                         {pokemon.abilities.map((abilityData, index) => (
                             <View
                                 key={index}
                                 style={[
                                     styles.abilityChip,
-                                    abilityData.is_hidden && styles.hiddenAbilityChip
+                                    abilityData.is_hidden ? styles.hiddenAbilityChip : styles.normalAbilityChip
                                 ]}
                             >
-                                <Text style={[
-                                    styles.abilityText,
-                                    abilityData.is_hidden && styles.hiddenAbilityText
-                                ]}>
-                                    {formatName(abilityData.ability.name)}
-                                </Text>
+                                <View style={styles.abilityInfo}>
+                                    <View style={[
+                                        styles.abilityDot,
+                                        { backgroundColor: abilityData.is_hidden ? COLORS.pink : COLORS.blue }
+                                    ]} />
+                                    <Text style={[
+                                        styles.abilityText,
+                                        abilityData.is_hidden && styles.hiddenAbilityText
+                                    ]}>
+                                        {formatName(abilityData.ability.name)}
+                                    </Text>
+                                </View>
                                 {abilityData.is_hidden && (
-                                    <Text style={styles.hiddenBadge}>Hidden</Text>
+                                    <View style={styles.hiddenBadge}>
+                                        <Text style={styles.hiddenBadgeText}>Hidden</Text>
+                                    </View>
                                 )}
                             </View>
                         ))}
@@ -190,7 +246,7 @@ export default function Details() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: "#111827",
+        backgroundColor: COLORS.background,
     },
     contentContainer: {
         padding: 16,
@@ -200,18 +256,19 @@ const styles = StyleSheet.create({
         flex: 1,
         justifyContent: "center",
         alignItems: "center",
-        backgroundColor: "#111827",
+        backgroundColor: COLORS.background,
     },
     loadingText: {
-        marginTop: 12,
+        marginTop: 16,
         fontSize: 16,
-        color: "#9CA3AF",
+        color: COLORS.purpleLight,
+        fontWeight: "500",
     },
     errorContainer: {
         flex: 1,
         justifyContent: "center",
         alignItems: "center",
-        backgroundColor: "#111827",
+        backgroundColor: COLORS.background,
         padding: 20,
     },
     errorEmoji: {
@@ -220,133 +277,170 @@ const styles = StyleSheet.create({
     },
     errorText: {
         fontSize: 18,
-        color: "#EF4444",
+        color: COLORS.pink,
         textAlign: "center",
     },
     headerCard: {
         alignItems: "center",
-        marginBottom: 24,
+        marginBottom: 28,
+        paddingTop: 8,
     },
     pokemonName: {
-        fontSize: 32,
+        fontSize: 34,
         fontWeight: "bold",
-        color: "#F9FAFB",
+        color: COLORS.textPrimary,
         textTransform: "capitalize",
-        letterSpacing: 1,
+        letterSpacing: 1.5,
     },
-    divider: {
-        width: 60,
+    dividerContainer: {
+        flexDirection: "row",
+        gap: 6,
+        marginTop: 14,
+    },
+    dividerSegment: {
+        width: 24,
         height: 4,
-        backgroundColor: "#6366F1",
         borderRadius: 2,
-        marginTop: 12,
     },
     section: {
-        marginBottom: 24,
+        marginBottom: 28,
+    },
+    sectionHeader: {
+        flexDirection: "row",
+        alignItems: "center",
+        marginBottom: 16,
+    },
+    sectionIcon: {
+        fontSize: 22,
+        marginRight: 10,
     },
     sectionTitle: {
         fontSize: 20,
-        fontWeight: "600",
-        color: "#F9FAFB",
-        marginBottom: 16,
+        fontWeight: "700",
+        color: COLORS.textPrimary,
     },
     subSectionTitle: {
-        fontSize: 14,
-        fontWeight: "500",
-        color: "#9CA3AF",
+        fontSize: 13,
+        fontWeight: "600",
+        color: COLORS.textMuted,
         marginBottom: 12,
         marginTop: 8,
+        textTransform: "uppercase",
+        letterSpacing: 1,
     },
     spriteRow: {
         flexDirection: "row",
-        justifyContent: "space-around",
+        justifyContent: "space-between",
         gap: 12,
     },
     spriteCard: {
         flex: 1,
-        backgroundColor: "#1F2937",
-        borderRadius: 16,
+        borderRadius: 20,
         padding: 16,
         alignItems: "center",
-        borderWidth: 1,
-        borderColor: "#374151",
+        borderWidth: 1.5,
+    },
+    normalCard: {
+        backgroundColor: COLORS.cardBg,
+        borderColor: COLORS.blue + "40",
     },
     shinyCard: {
-        borderColor: "#FBBF24",
-        backgroundColor: "rgba(251, 191, 36, 0.1)",
+        backgroundColor: "rgba(236, 72, 153, 0.08)",
+        borderColor: COLORS.pink + "50",
     },
     spriteImage: {
         width: 100,
         height: 100,
     },
     spriteLabel: {
-        marginTop: 8,
-        fontSize: 14,
-        color: "#9CA3AF",
-        fontWeight: "500",
+        marginTop: 10,
+        fontSize: 13,
+        color: COLORS.textSecondary,
+        fontWeight: "600",
     },
     statsRow: {
         flexDirection: "row",
-        justifyContent: "space-around",
+        justifyContent: "space-between",
         gap: 12,
     },
     statCard: {
         flex: 1,
-        backgroundColor: "#1F2937",
-        borderRadius: 16,
+        borderRadius: 20,
         padding: 20,
         alignItems: "center",
-        borderWidth: 1,
-        borderColor: "#374151",
+        borderWidth: 1.5,
+    },
+    weightCard: {
+        backgroundColor: "rgba(59, 130, 246, 0.08)",
+        borderColor: COLORS.blue + "40",
+    },
+    heightCard: {
+        backgroundColor: "rgba(168, 85, 247, 0.08)",
+        borderColor: COLORS.purple + "40",
     },
     statIcon: {
-        fontSize: 28,
-        marginBottom: 8,
+        fontSize: 32,
+        marginBottom: 10,
     },
     statValue: {
-        fontSize: 24,
+        fontSize: 26,
         fontWeight: "bold",
-        color: "#F9FAFB",
     },
     statLabel: {
-        marginTop: 4,
-        fontSize: 14,
-        color: "#9CA3AF",
+        marginTop: 6,
+        fontSize: 13,
+        color: COLORS.textMuted,
+        fontWeight: "500",
     },
     abilitiesContainer: {
-        gap: 12,
+        gap: 10,
     },
     abilityChip: {
-        backgroundColor: "#1F2937",
-        borderRadius: 12,
-        paddingVertical: 14,
-        paddingHorizontal: 20,
+        borderRadius: 16,
+        paddingVertical: 16,
+        paddingHorizontal: 18,
         flexDirection: "row",
         alignItems: "center",
         justifyContent: "space-between",
-        borderWidth: 1,
-        borderColor: "#374151",
+        borderWidth: 1.5,
+    },
+    normalAbilityChip: {
+        backgroundColor: COLORS.cardBg,
+        borderColor: COLORS.blue + "30",
     },
     hiddenAbilityChip: {
-        borderColor: "#8B5CF6",
-        backgroundColor: "rgba(139, 92, 246, 0.1)",
+        backgroundColor: "rgba(236, 72, 153, 0.08)",
+        borderColor: COLORS.pink + "40",
+    },
+    abilityInfo: {
+        flexDirection: "row",
+        alignItems: "center",
+    },
+    abilityDot: {
+        width: 8,
+        height: 8,
+        borderRadius: 4,
+        marginRight: 12,
     },
     abilityText: {
         fontSize: 16,
-        color: "#F9FAFB",
-        fontWeight: "500",
+        color: COLORS.textPrimary,
+        fontWeight: "600",
     },
     hiddenAbilityText: {
-        color: "#C4B5FD",
+        color: COLORS.pinkLight,
     },
     hiddenBadge: {
-        fontSize: 12,
-        color: "#8B5CF6",
-        backgroundColor: "rgba(139, 92, 246, 0.2)",
-        paddingHorizontal: 10,
-        paddingVertical: 4,
-        borderRadius: 8,
-        overflow: "hidden",
-        fontWeight: "600",
+        backgroundColor: COLORS.pink + "20",
+        paddingHorizontal: 12,
+        paddingVertical: 5,
+        borderRadius: 10,
+    },
+    hiddenBadgeText: {
+        fontSize: 11,
+        color: COLORS.pinkLight,
+        fontWeight: "700",
+        textTransform: "uppercase",
+        letterSpacing: 0.5,
     },
 });
