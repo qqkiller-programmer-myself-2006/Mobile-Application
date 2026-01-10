@@ -3,20 +3,85 @@ import { useEffect, useState } from "react";
 import { Stack, useLocalSearchParams } from "expo-router";
 
 interface PokemonData {
+    id: number;
     name: string;
+    order: number;
     weight: number;
     height: number;
+    base_experience: number;
+    is_default: boolean;
     abilities: {
         ability: {
             name: string;
+            url: string;
         };
         is_hidden: boolean;
+        slot: number;
+    }[];
+    past_abilities: {
+        abilities: {
+            ability: {
+                name: string;
+                url: string;
+            };
+            is_hidden: boolean;
+            slot: number;
+        }[];
+        generation: {
+            name: string;
+            url: string;
+        };
     }[];
     sprites: {
         front_default: string | null;
         back_default: string | null;
         front_shiny: string | null;
         back_shiny: string | null;
+    };
+    stats: {
+        base_stat: number;
+        effort: number;
+        stat: {
+            name: string;
+            url: string;
+        };
+    }[];
+    types: {
+        slot: number;
+        type: {
+            name: string;
+            url: string;
+        };
+    }[];
+    past_types: {
+        generation: {
+            name: string;
+            url: string;
+        };
+        types: {
+            slot: number;
+            type: {
+                name: string;
+                url: string;
+            };
+        }[];
+    }[];
+    held_items: {
+        item: {
+            name: string;
+            url: string;
+        };
+        version_details: {
+            rarity: number;
+            version: {
+                name: string;
+                url: string;
+            };
+        }[];
+    }[];
+    species: {
+        name: string;
+        url: string;
     };
 }
 
@@ -45,10 +110,47 @@ const COLORS = {
     mint: "#8FC0A8",          // Dusty Mint (เข้มขึ้น)
     cream: "#F5EDE5",         // Warm Cream
 
+    // สีเพิ่มเติมสำหรับ Types
+    green: "#7EC89D",         // Soft Green
+    yellow: "#E8D47A",        // Soft Yellow
+    orange: "#E8A87A",        // Soft Orange
+
     // ข้อความ - เข้มขึ้นมาก อ่านชัด
     textPrimary: "#2D2836",   // Dark Purple Grey (เข้มมาก)
     textSecondary: "#4A4453", // Medium Grey (เข้มขึ้น)
     textMuted: "#6B6374",     // Muted Grey (เข้มขึ้น)
+};
+
+// สีสำหรับแต่ละ Type ของ Pokemon
+const TYPE_COLORS: { [key: string]: string } = {
+    normal: "#A8A878",
+    fire: "#F08030",
+    water: "#6890F0",
+    electric: "#F8D030",
+    grass: "#78C850",
+    ice: "#98D8D8",
+    fighting: "#C03028",
+    poison: "#A040A0",
+    ground: "#E0C068",
+    flying: "#A890F0",
+    psychic: "#F85888",
+    bug: "#A8B820",
+    rock: "#B8A038",
+    ghost: "#705898",
+    dragon: "#7038F8",
+    dark: "#705848",
+    steel: "#B8B8D0",
+    fairy: "#EE99AC",
+};
+
+// สีสำหรับ Stats
+const STAT_COLORS: { [key: string]: string } = {
+    hp: "#FF5959",
+    attack: "#F5AC78",
+    defense: "#FAE078",
+    "special-attack": "#9DB7F5",
+    "special-defense": "#A7DB8D",
+    speed: "#FA92B2",
 };
 
 export default function Details() {
@@ -82,6 +184,18 @@ export default function Details() {
 
     const formatName = (name: string) => {
         return name.charAt(0).toUpperCase() + name.slice(1).replace(/-/g, " ");
+    };
+
+    const formatStatName = (name: string) => {
+        const statNames: { [key: string]: string } = {
+            hp: "HP",
+            attack: "Attack",
+            defense: "Defense",
+            "special-attack": "Sp. Atk",
+            "special-defense": "Sp. Def",
+            speed: "Speed",
+        };
+        return statNames[name] || formatName(name);
     };
 
     if (loading) {
@@ -118,13 +232,35 @@ export default function Details() {
                 }}
             />
             <ScrollView style={styles.container} contentContainerStyle={styles.contentContainer}>
-                {/* Pokemon Name Header */}
+                {/* Pokemon Name & ID Header */}
                 <View style={styles.headerCard}>
+                    <Text style={styles.pokemonId}>#{String(pokemon.id).padStart(4, '0')}</Text>
                     <Text style={styles.pokemonName}>{formatName(pokemon.name)}</Text>
                     <View style={styles.dividerContainer}>
                         <View style={[styles.dividerSegment, { backgroundColor: COLORS.purple }]} />
                         <View style={[styles.dividerSegment, { backgroundColor: COLORS.blue }]} />
                         <View style={[styles.dividerSegment, { backgroundColor: COLORS.pink }]} />
+                    </View>
+                </View>
+
+                {/* Types Section */}
+                <View style={styles.section}>
+                    <View style={styles.sectionHeader}>
+                        <Text style={styles.sectionIcon}>🏷️</Text>
+                        <Text style={styles.sectionTitle}>Types</Text>
+                    </View>
+                    <View style={styles.typesRow}>
+                        {pokemon.types.map((typeData, index) => (
+                            <View
+                                key={index}
+                                style={[
+                                    styles.typeChip,
+                                    { backgroundColor: TYPE_COLORS[typeData.type.name] || COLORS.purple }
+                                ]}
+                            >
+                                <Text style={styles.typeText}>{formatName(typeData.type.name)}</Text>
+                            </View>
+                        ))}
                     </View>
                 </View>
 
@@ -178,26 +314,84 @@ export default function Details() {
                     </View>
                 </View>
 
+                {/* Base Info Section */}
+                <View style={styles.section}>
+                    <View style={styles.sectionHeader}>
+                        <Text style={styles.sectionIcon}>📋</Text>
+                        <Text style={styles.sectionTitle}>Basic Info</Text>
+                    </View>
+                    <View style={styles.infoGrid}>
+                        <View style={[styles.infoCard, styles.weightCard]}>
+                            <Text style={styles.infoIcon}>⚖️</Text>
+                            <Text style={[styles.infoValue, { color: COLORS.blue }]}>
+                                {(pokemon.weight / 10).toFixed(1)} kg
+                            </Text>
+                            <Text style={styles.infoLabel}>Weight</Text>
+                        </View>
+                        <View style={[styles.infoCard, styles.heightCard]}>
+                            <Text style={styles.infoIcon}>📏</Text>
+                            <Text style={[styles.infoValue, { color: COLORS.purple }]}>
+                                {(pokemon.height / 10).toFixed(1)} m
+                            </Text>
+                            <Text style={styles.infoLabel}>Height</Text>
+                        </View>
+                    </View>
+                    <View style={styles.infoGrid}>
+                        <View style={[styles.infoCard, styles.expCard]}>
+                            <Text style={styles.infoIcon}>⭐</Text>
+                            <Text style={[styles.infoValue, { color: COLORS.orange }]}>
+                                {pokemon.base_experience || "N/A"}
+                            </Text>
+                            <Text style={styles.infoLabel}>Base Exp</Text>
+                        </View>
+                        <View style={[styles.infoCard, styles.orderCard]}>
+                            <Text style={styles.infoIcon}>📊</Text>
+                            <Text style={[styles.infoValue, { color: COLORS.mint }]}>
+                                #{pokemon.order}
+                            </Text>
+                            <Text style={styles.infoLabel}>Order</Text>
+                        </View>
+                    </View>
+                    {/* Is Default */}
+                    <View style={styles.defaultInfoRow}>
+                        <Text style={styles.defaultLabel}>🎯 Is Default Form:</Text>
+                        <View style={[styles.defaultBadge, pokemon.is_default ? styles.yesDefault : styles.noDefault]}>
+                            <Text style={styles.defaultBadgeText}>
+                                {pokemon.is_default ? "Yes" : "No"}
+                            </Text>
+                        </View>
+                    </View>
+                </View>
+
                 {/* Stats Section */}
                 <View style={styles.section}>
                     <View style={styles.sectionHeader}>
-                        <Text style={styles.sectionIcon}>📊</Text>
-                        <Text style={styles.sectionTitle}>Stats</Text>
+                        <Text style={styles.sectionIcon}>📈</Text>
+                        <Text style={styles.sectionTitle}>Base Stats</Text>
                     </View>
-                    <View style={styles.statsRow}>
-                        <View style={[styles.statCard, styles.weightCard]}>
-                            <Text style={styles.statIcon}>⚖️</Text>
-                            <Text style={[styles.statValue, { color: COLORS.blue }]}>
-                                {(pokemon.weight / 10).toFixed(1)} kg
+                    <View style={styles.statsContainer}>
+                        {pokemon.stats.map((statData, index) => (
+                            <View key={index} style={styles.statRow}>
+                                <Text style={styles.statName}>{formatStatName(statData.stat.name)}</Text>
+                                <Text style={styles.statValue}>{statData.base_stat}</Text>
+                                <View style={styles.statBarContainer}>
+                                    <View
+                                        style={[
+                                            styles.statBar,
+                                            {
+                                                width: `${Math.min(100, (statData.base_stat / 255) * 100)}%`,
+                                                backgroundColor: STAT_COLORS[statData.stat.name] || COLORS.blue
+                                            }
+                                        ]}
+                                    />
+                                </View>
+                            </View>
+                        ))}
+                        <View style={styles.totalStatRow}>
+                            <Text style={styles.totalStatLabel}>Total</Text>
+                            <Text style={styles.totalStatValue}>
+                                {pokemon.stats.reduce((sum, stat) => sum + stat.base_stat, 0)}
                             </Text>
-                            <Text style={styles.statLabel}>Weight</Text>
-                        </View>
-                        <View style={[styles.statCard, styles.heightCard]}>
-                            <Text style={styles.statIcon}>📏</Text>
-                            <Text style={[styles.statValue, { color: COLORS.purple }]}>
-                                {(pokemon.height / 10).toFixed(1)} m
-                            </Text>
-                            <Text style={styles.statLabel}>Height</Text>
                         </View>
                     </View>
                 </View>
@@ -238,6 +432,97 @@ export default function Details() {
                         ))}
                     </View>
                 </View>
+
+                {/* Past Abilities Section */}
+                {pokemon.past_abilities && pokemon.past_abilities.length > 0 && (
+                    <View style={styles.section}>
+                        <View style={styles.sectionHeader}>
+                            <Text style={styles.sectionIcon}>⏳</Text>
+                            <Text style={styles.sectionTitle}>Past Abilities</Text>
+                        </View>
+                        {pokemon.past_abilities.map((pastData, genIndex) => (
+                            <View key={genIndex} style={styles.pastContainer}>
+                                <Text style={styles.generationTitle}>
+                                    🎮 {formatName(pastData.generation.name)}
+                                </Text>
+                                <View style={styles.abilitiesContainer}>
+                                    {pastData.abilities
+                                        .filter((abilityData) => abilityData.ability !== null)
+                                        .map((abilityData, index) => (
+                                            <View
+                                                key={index}
+                                                style={[
+                                                    styles.abilityChip,
+                                                    abilityData.is_hidden ? styles.hiddenAbilityChip : styles.normalAbilityChip
+                                                ]}
+                                            >
+                                                <View style={styles.abilityInfo}>
+                                                    <View style={[
+                                                        styles.abilityDot,
+                                                        { backgroundColor: abilityData.is_hidden ? COLORS.pink : COLORS.blue }
+                                                    ]} />
+                                                    <Text style={[
+                                                        styles.abilityText,
+                                                        abilityData.is_hidden && styles.hiddenAbilityText
+                                                    ]}>
+                                                        {formatName(abilityData.ability.name)}
+                                                    </Text>
+                                                </View>
+                                                {abilityData.is_hidden && (
+                                                    <View style={styles.hiddenBadge}>
+                                                        <Text style={styles.hiddenBadgeText}>Hidden</Text>
+                                                    </View>
+                                                )}
+                                            </View>
+                                        ))}
+                                </View>
+                            </View>
+                        ))}
+                    </View>
+                )}
+
+                {/* Past Types Section */}
+                {pokemon.past_types && pokemon.past_types.length > 0 && (
+                    <View style={styles.section}>
+                        <View style={styles.sectionHeader}>
+                            <Text style={styles.sectionIcon}>🕰️</Text>
+                            <Text style={styles.sectionTitle}>Past Types</Text>
+                        </View>
+                        {pokemon.past_types.map((pastData, genIndex) => (
+                            <View key={genIndex} style={styles.pastContainer}>
+                                <Text style={styles.generationTitle}>
+                                    🎮 {formatName(pastData.generation.name)}
+                                </Text>
+                                <View style={styles.typesRow}>
+                                    {pastData.types.map((typeData, index) => (
+                                        <View
+                                            key={index}
+                                            style={[
+                                                styles.typeChip,
+                                                { backgroundColor: TYPE_COLORS[typeData.type.name] || COLORS.purple }
+                                            ]}
+                                        >
+                                            <Text style={styles.typeText}>{formatName(typeData.type.name)}</Text>
+                                        </View>
+                                    ))}
+                                </View>
+                            </View>
+                        ))}
+                    </View>
+                )}
+
+                {/* Species Section */}
+                <View style={styles.section}>
+                    <View style={styles.sectionHeader}>
+                        <Text style={styles.sectionIcon}>🧬</Text>
+                        <Text style={styles.sectionTitle}>Species</Text>
+                    </View>
+                    <View style={styles.speciesCard}>
+                        <Text style={styles.speciesName}>{formatName(pokemon.species.name)}</Text>
+                    </View>
+                </View>
+
+
             </ScrollView>
         </>
     );
@@ -285,6 +570,12 @@ const styles = StyleSheet.create({
         marginBottom: 28,
         paddingTop: 8,
     },
+    pokemonId: {
+        fontSize: 16,
+        fontWeight: "600",
+        color: COLORS.textMuted,
+        marginBottom: 4,
+    },
     pokemonName: {
         fontSize: 34,
         fontWeight: "bold",
@@ -328,6 +619,26 @@ const styles = StyleSheet.create({
         textTransform: "uppercase",
         letterSpacing: 1,
     },
+    // Types
+    typesRow: {
+        flexDirection: "row",
+        flexWrap: "wrap",
+        gap: 10,
+    },
+    typeChip: {
+        paddingHorizontal: 20,
+        paddingVertical: 10,
+        borderRadius: 20,
+    },
+    typeText: {
+        color: "#FFFFFF",
+        fontWeight: "700",
+        fontSize: 14,
+        textShadowColor: "rgba(0,0,0,0.3)",
+        textShadowOffset: { width: 0, height: 1 },
+        textShadowRadius: 2,
+    },
+    // Sprites
     spriteRow: {
         flexDirection: "row",
         justifyContent: "space-between",
@@ -358,12 +669,14 @@ const styles = StyleSheet.create({
         color: COLORS.textSecondary,
         fontWeight: "600",
     },
-    statsRow: {
+    // Info Grid
+    infoGrid: {
         flexDirection: "row",
         justifyContent: "space-between",
         gap: 12,
+        marginBottom: 12,
     },
-    statCard: {
+    infoCard: {
         flex: 1,
         borderRadius: 20,
         padding: 20,
@@ -378,20 +691,113 @@ const styles = StyleSheet.create({
         backgroundColor: "rgba(168, 85, 247, 0.08)",
         borderColor: COLORS.purple + "40",
     },
-    statIcon: {
+    expCard: {
+        backgroundColor: "rgba(232, 168, 122, 0.15)",
+        borderColor: COLORS.orange + "40",
+    },
+    orderCard: {
+        backgroundColor: "rgba(143, 192, 168, 0.15)",
+        borderColor: COLORS.mint + "40",
+    },
+    infoIcon: {
         fontSize: 32,
         marginBottom: 10,
     },
-    statValue: {
-        fontSize: 26,
+    infoValue: {
+        fontSize: 24,
         fontWeight: "bold",
     },
-    statLabel: {
+    infoLabel: {
         marginTop: 6,
         fontSize: 13,
         color: COLORS.textMuted,
         fontWeight: "500",
     },
+    defaultInfoRow: {
+        flexDirection: "row",
+        alignItems: "center",
+        justifyContent: "center",
+        marginTop: 8,
+        gap: 12,
+    },
+    defaultLabel: {
+        fontSize: 15,
+        color: COLORS.textSecondary,
+        fontWeight: "500",
+    },
+    defaultBadge: {
+        paddingHorizontal: 16,
+        paddingVertical: 6,
+        borderRadius: 12,
+    },
+    yesDefault: {
+        backgroundColor: COLORS.mint + "30",
+    },
+    noDefault: {
+        backgroundColor: COLORS.pink + "30",
+    },
+    defaultBadgeText: {
+        fontSize: 13,
+        fontWeight: "700",
+        color: COLORS.textPrimary,
+    },
+    // Stats
+    statsContainer: {
+        backgroundColor: COLORS.cardBg,
+        borderRadius: 20,
+        padding: 20,
+        borderWidth: 1.5,
+        borderColor: COLORS.cardBorder,
+    },
+    statRow: {
+        flexDirection: "row",
+        alignItems: "center",
+        marginBottom: 12,
+    },
+    statName: {
+        width: 70,
+        fontSize: 13,
+        fontWeight: "600",
+        color: COLORS.textSecondary,
+    },
+    statValue: {
+        width: 40,
+        fontSize: 14,
+        fontWeight: "700",
+        color: COLORS.textPrimary,
+        textAlign: "right",
+        marginRight: 12,
+    },
+    statBarContainer: {
+        flex: 1,
+        height: 10,
+        backgroundColor: COLORS.cream,
+        borderRadius: 5,
+        overflow: "hidden",
+    },
+    statBar: {
+        height: "100%",
+        borderRadius: 5,
+    },
+    totalStatRow: {
+        flexDirection: "row",
+        justifyContent: "space-between",
+        marginTop: 12,
+        paddingTop: 12,
+        borderTopWidth: 1,
+        borderTopColor: COLORS.cardBorder,
+    },
+    totalStatLabel: {
+        fontSize: 14,
+        fontWeight: "700",
+        color: COLORS.textPrimary,
+    },
+    totalStatValue: {
+        fontSize: 16,
+        fontWeight: "800",
+        color: COLORS.purple,
+    },
+    // Abilities
     abilitiesContainer: {
         gap: 10,
     },
@@ -428,7 +834,7 @@ const styles = StyleSheet.create({
         fontWeight: "600",
     },
     hiddenAbilityText: {
-        color: COLORS.pinkLight,
+        color: COLORS.pinkDark,
     },
     hiddenBadge: {
         backgroundColor: COLORS.pink + "20",
@@ -438,9 +844,88 @@ const styles = StyleSheet.create({
     },
     hiddenBadgeText: {
         fontSize: 11,
-        color: COLORS.pinkLight,
+        color: COLORS.pinkDark,
         fontWeight: "700",
         textTransform: "uppercase",
         letterSpacing: 0.5,
+    },
+    // Past Abilities & Types
+    pastContainer: {
+        marginBottom: 16,
+        padding: 16,
+        backgroundColor: COLORS.cream,
+        borderRadius: 16,
+    },
+    generationTitle: {
+        fontSize: 14,
+        fontWeight: "600",
+        color: COLORS.textSecondary,
+        marginBottom: 12,
+    },
+    // Species
+    speciesCard: {
+        backgroundColor: COLORS.cardBg,
+        borderRadius: 16,
+        padding: 20,
+        alignItems: "center",
+        borderWidth: 1.5,
+        borderColor: COLORS.mint + "40",
+    },
+    speciesName: {
+        fontSize: 18,
+        fontWeight: "700",
+        color: COLORS.textPrimary,
+    },
+    // Held Items
+    heldItemsContainer: {
+        gap: 12,
+    },
+    heldItemCard: {
+        backgroundColor: COLORS.cardBg,
+        borderRadius: 16,
+        padding: 16,
+        borderWidth: 1.5,
+        borderColor: COLORS.peach + "40",
+    },
+    heldItemName: {
+        fontSize: 16,
+        fontWeight: "700",
+        color: COLORS.textPrimary,
+        marginBottom: 10,
+    },
+    versionDetailsContainer: {
+        flexDirection: "row",
+        flexWrap: "wrap",
+        gap: 8,
+    },
+    versionDetailChip: {
+        flexDirection: "row",
+        alignItems: "center",
+        backgroundColor: COLORS.cream,
+        paddingHorizontal: 12,
+        paddingVertical: 6,
+        borderRadius: 12,
+        gap: 6,
+    },
+    versionName: {
+        fontSize: 12,
+        color: COLORS.textSecondary,
+        fontWeight: "500",
+    },
+    rarityText: {
+        fontSize: 12,
+        color: COLORS.purple,
+        fontWeight: "700",
+    },
+    emptyCard: {
+        backgroundColor: COLORS.cream,
+        borderRadius: 16,
+        padding: 24,
+        alignItems: "center",
+    },
+    emptyText: {
+        fontSize: 15,
+        color: COLORS.textMuted,
+        fontWeight: "500",
     },
 });
