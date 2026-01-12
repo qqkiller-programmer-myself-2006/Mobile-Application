@@ -433,54 +433,6 @@ export default function Details() {
                     </View>
                 </View>
 
-                {/* Past Abilities Section */}
-                {pokemon.past_abilities && pokemon.past_abilities.length > 0 && (
-                    <View style={styles.section}>
-                        <View style={styles.sectionHeader}>
-                            <Text style={styles.sectionIcon}>⏳</Text>
-                            <Text style={styles.sectionTitle}>Past Abilities</Text>
-                        </View>
-                        {pokemon.past_abilities.map((pastData, genIndex) => (
-                            <View key={genIndex} style={styles.pastContainer}>
-                                <Text style={styles.generationTitle}>
-                                    🎮 {formatName(pastData.generation.name)}
-                                </Text>
-                                <View style={styles.abilitiesContainer}>
-                                    {pastData.abilities
-                                        .filter((abilityData) => abilityData.ability !== null)
-                                        .map((abilityData, index) => (
-                                            <View
-                                                key={index}
-                                                style={[
-                                                    styles.abilityChip,
-                                                    abilityData.is_hidden ? styles.hiddenAbilityChip : styles.normalAbilityChip
-                                                ]}
-                                            >
-                                                <View style={styles.abilityInfo}>
-                                                    <View style={[
-                                                        styles.abilityDot,
-                                                        { backgroundColor: abilityData.is_hidden ? COLORS.pink : COLORS.blue }
-                                                    ]} />
-                                                    <Text style={[
-                                                        styles.abilityText,
-                                                        abilityData.is_hidden && styles.hiddenAbilityText
-                                                    ]}>
-                                                        {formatName(abilityData.ability.name)}
-                                                    </Text>
-                                                </View>
-                                                {abilityData.is_hidden && (
-                                                    <View style={styles.hiddenBadge}>
-                                                        <Text style={styles.hiddenBadgeText}>Hidden</Text>
-                                                    </View>
-                                                )}
-                                            </View>
-                                        ))}
-                                </View>
-                            </View>
-                        ))}
-                    </View>
-                )}
-
                 {/* Past Types Section */}
                 {pokemon.past_types && pokemon.past_types.length > 0 && (
                     <View style={styles.section}>
